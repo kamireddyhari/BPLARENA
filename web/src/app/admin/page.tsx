@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Plus, Trash2, Save, RefreshCw, ChevronDown, ChevronUp, CheckCircle } from "lucide-react";
+import { APPS_SCRIPT_URL } from "../../lib/config";
 
 const CIBIL_TIERS = ["825+", "800+", "750+", "700-749", "650-699"] as const;
 type CibilTier = typeof CIBIL_TIERS[number];
@@ -54,11 +55,11 @@ export default function AdminPage() {
   const fetchBanks = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/banks`, { cache: "no-store" });
+      const res = await fetch(`${APPS_SCRIPT_URL}?action=banks`);
       const data = await res.json();
       setBanks(data);
     } catch {
-      alert("Could not connect to backend. Make sure it is running on port 8000.");
+      alert("Could not connect to backend. Check your internet connection.");
     } finally {
       setLoading(false);
     }
@@ -133,15 +134,15 @@ export default function AdminPage() {
   const save = async () => {
     setSaving(true);
     try {
-      await fetch(`/api/banks`, {
+      await fetch(APPS_SCRIPT_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(banks),
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify({ action: "saveBanks", banks }),
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch {
-      alert("Failed to save. Check backend is running.");
+      alert("Failed to save. Check your internet connection.");
     } finally {
       setSaving(false);
     }

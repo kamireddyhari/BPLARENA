@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { X, TrendingUp, RefreshCw } from "lucide-react";
+import { APPS_SCRIPT_URL } from "../lib/config";
 
 type KhathaType = "A_Khatha" | "B_Khatha";
 type CibilTier = "825+" | "800+" | "750+" | "700-749" | "650-699";
@@ -38,7 +39,7 @@ export default function LiveRates({ onClose }: { onClose: () => void }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/banks`, { cache: "no-store" })
+    fetch(`${APPS_SCRIPT_URL}?action=banks`)
       .then((r) => r.json())
       .then((data) => setBanks(data))
       .catch(() => setBanks([]))

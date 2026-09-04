@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, CheckCircle, Phone, User, Briefcase, Send } from "lucide-react";
+import { APPS_SCRIPT_URL } from "../lib/config";
 
 const SERVICES = [
   "Home Loan",
@@ -43,10 +44,10 @@ export default function LeadForm({
     };
 
     try {
-      const res = await fetch('/api/leads', {
+      const res = await fetch(APPS_SCRIPT_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), phone, service }),
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify({ action: "leads", name: name.trim(), phone, service }),
       });
       if (res.ok) {
         const data = await res.json();

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Search } from "lucide-react";
 import LeadForm from "./LeadForm";
+import { APPS_SCRIPT_URL } from "../lib/config";
 
 type BankType = {
   name: string;
@@ -21,7 +22,7 @@ export default function BankMarquee() {
   const [showLeadForm, setShowLeadForm] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/banks`, { cache: "no-store" })
+    fetch(`${APPS_SCRIPT_URL}?action=banks`)
       .then((r) => r.json())
       .then((data: any[]) => {
         const mapped = data.map((b) => ({
