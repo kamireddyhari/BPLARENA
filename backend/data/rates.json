@@ -1,0 +1,132 @@
+{
+  "banks": [
+    {
+      "name": "SBI",
+      "logo": "🏦",
+      "A_Khatha": {
+        "750_plus": "8.40%",
+        "700_749": "8.65%",
+        "650_699": "9.10%"
+      },
+      "B_Khatha": {
+        "750_plus": "Not Available",
+        "700_749": "Not Available",
+        "650_699": "Not Available"
+      },
+      "personal_loan": "11.05%",
+      "note": "SBI does not finance B Khatha properties"
+    },
+    {
+      "name": "HDFC Bank",
+      "logo": "🏛️",
+      "A_Khatha": {
+        "750_plus": "8.50%",
+        "700_749": "8.75%",
+        "650_699": "9.25%"
+      },
+      "B_Khatha": {
+        "750_plus": "10.50%",
+        "700_749": "Not Available",
+        "650_699": "Not Available"
+      },
+      "personal_loan": "10.50%",
+      "note": "HDFC considers B Khatha case-by-case for high CIBIL"
+    },
+    {
+      "name": "ICICI Bank",
+      "logo": "💰",
+      "A_Khatha": {
+        "750_plus": "8.65%",
+        "700_749": "8.90%",
+        "650_699": "9.40%"
+      },
+      "B_Khatha": {
+        "750_plus": "10.75%",
+        "700_749": "11.00%",
+        "650_699": "Not Available"
+      },
+      "personal_loan": "10.65%",
+      "note": "ICICI is flexible on B Khatha with strong income proof"
+    },
+    {
+      "name": "Axis Bank",
+      "logo": "💳",
+      "A_Khatha": {
+        "750_plus": "8.70%",
+        "700_749": "8.95%",
+        "650_699": "9.50%"
+      },
+      "B_Khatha": {
+        "750_plus": "10.80%",
+        "700_749": "11.10%",
+        "650_699": "11.50%"
+      },
+      "personal_loan": "10.49%",
+      "note": "Axis Bank active in B Khatha financing in Bangalore"
+    },
+    {
+      "name": "LIC HFL",
+      "logo": "📈",
+      "A_Khatha": {
+        "750_plus": "8.60%",
+        "700_749": "8.80%",
+        "650_699": "9.30%"
+      },
+      "B_Khatha": {
+        "750_plus": "10.60%",
+        "700_749": "10.90%",
+        "650_699": "11.30%"
+      },
+      "personal_loan": "Not Available",
+      "note": "LIC HFL specialises in housing finance, good for B Khatha"
+    },
+    {
+      "name": "PNB Housing",
+      "logo": "🏢",
+      "A_Khatha": {
+        "750_plus": "8.75%",
+        "700_749": "9.00%",
+        "650_699": "9.60%"
+      },
+      "B_Khatha": {
+        "750_plus": "10.90%",
+        "700_749": "11.20%",
+        "650_699": "11.75%"
+      },
+      "personal_loan": "Not Available",
+      "note": "PNB Housing actively funds B Khatha properties in Bangalore"
+    },
+    {
+      "name": "Kotak Mahindra",
+      "logo": "🏦",
+      "A_Khatha": {
+        "750_plus": "8.80%",
+        "700_749": "9.05%",
+        "650_699": "9.65%"
+      },
+      "B_Khatha": {
+        "750_plus": "Not Available",
+        "700_749": "Not Available",
+        "650_699": "Not Available"
+      },
+      "personal_loan": "10.99%",
+      "note": "Kotak primarily funds A Khatha properties only"
+    },
+    {
+      "name": "Bank of Baroda",
+      "logo": "🏛️",
+      "A_Khatha": {
+        "750_plus": "8.45%",
+        "700_749": "8.70%",
+        "650_699": "9.20%"
+      },
+      "B_Khatha": {
+        "750_plus": "Not Available",
+        "700_749": "Not Available",
+        "650_699": "Not Available"
+      },
+      "personal_loan": "11.40%",
+      "note": "Bank of Baroda: good rates for A Khatha, no B Khatha"
+    }
+  ]
+}
