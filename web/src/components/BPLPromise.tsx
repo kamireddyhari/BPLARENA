@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, TrendingUp, PhoneCall } from "lucide-react";
+import { X, TrendingUp, PhoneCall, Calculator } from "lucide-react";
 import LiveRates from "./LiveRates";
 import LeadForm from "./LeadForm";
+import EMICalculator from "./EMICalculator";
 
 export default function BPLPromise() {
-  const [activeModal, setActiveModal] = useState<"promise" | "rates" | "consult" | null>(null);
+  const [activeModal, setActiveModal] = useState<"promise" | "rates" | "consult" | "calculator" | null>(null);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -46,6 +47,16 @@ export default function BPLPromise() {
         >
           <TrendingUp className="w-4 h-4 flex-shrink-0" />
           <span className="ml-2.5">Live ROI</span>
+        </button>
+
+        {/* 1.5) Calculator */}
+        <button
+          onClick={() => setActiveModal("calculator")}
+          className="flex items-center px-5 py-3.5 bg-[#FF6A00] text-white rounded-l-full shadow-lg hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:scale-105 transform-gpu transition-all duration-300 font-bold text-sm whitespace-nowrap"
+          aria-label="Calculator"
+        >
+          <Calculator className="w-4 h-4 flex-shrink-0" />
+          <span className="ml-2.5">Calculator</span>
         </button>
 
         {/* 2) BPL Promise */}
@@ -136,6 +147,7 @@ export default function BPLPromise() {
         )}
 
         {/* Existing modals */}
+        {activeModal === "calculator" && <EMICalculator onClose={() => setActiveModal(null)} />}
         {activeModal === "rates" && <LiveRates onClose={() => setActiveModal(null)} />}
         {activeModal === "consult" && <LeadForm defaultService="30 Mins Free Consultation" onClose={() => setActiveModal(null)} />}
       </AnimatePresence>
