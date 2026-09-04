@@ -1,36 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   X,
   Calculator,
   Home,
   ArrowLeftRight,
+  Loader2,
 } from "lucide-react";
+import { APPS_SCRIPT_URL } from "../lib/config";
 
 /* ─── Helpers ─── */
-const BANKS = [
-  { name: "SBI", homeRate: { A: { "825+": 8.40, "800-824": 8.50, "750-799": 8.65, "700-749": 9.10, "650-699": 9.50, "below650": 0 }, B: { "825+": 0, "800-824": 0, "750-799": 0, "700-749": 0, "650-699": 0, "below650": 0 } } },
-  { name: "HDFC Bank", homeRate: { A: { "825+": 8.50, "800-824": 8.60, "750-799": 8.75, "700-749": 9.25, "650-699": 9.65, "below650": 0 }, B: { "825+": 10.50, "800-824": 10.75, "750-799": 0, "700-749": 0, "650-699": 0, "below650": 0 } } },
-  { name: "ICICI Bank", homeRate: { A: { "825+": 8.65, "800-824": 8.75, "750-799": 8.90, "700-749": 9.40, "650-699": 9.80, "below650": 0 }, B: { "825+": 10.75, "800-824": 10.85, "750-799": 11.00, "700-749": 0, "650-699": 0, "below650": 0 } } },
-  { name: "Axis Bank", homeRate: { A: { "825+": 8.70, "800-824": 8.80, "750-799": 8.95, "700-749": 9.50, "650-699": 9.90, "below650": 10.50 }, B: { "825+": 10.80, "800-824": 10.95, "750-799": 11.10, "700-749": 11.50, "650-699": 11.90, "below650": 0 } } },
-  { name: "LIC HFL", homeRate: { A: { "825+": 8.60, "800-824": 8.70, "750-799": 8.80, "700-749": 9.30, "650-699": 9.70, "below650": 10.30 }, B: { "825+": 10.60, "800-824": 10.75, "750-799": 10.90, "700-749": 11.30, "650-699": 11.70, "below650": 0 } } },
-  { name: "PNB Housing", homeRate: { A: { "825+": 8.75, "800-824": 8.85, "750-799": 9.00, "700-749": 9.60, "650-699": 10.00, "below650": 10.60 }, B: { "825+": 10.90, "800-824": 11.05, "750-799": 11.20, "700-749": 11.75, "650-699": 12.10, "below650": 0 } } },
-  { name: "Kotak Mahindra", homeRate: { A: { "825+": 8.80, "800-824": 8.90, "750-799": 9.05, "700-749": 9.65, "650-699": 10.10, "below650": 0 }, B: { "825+": 0, "800-824": 0, "750-799": 0, "700-749": 0, "650-699": 0, "below650": 0 } } },
-  { name: "Bank of Baroda", homeRate: { A: { "825+": 8.45, "800-824": 8.55, "750-799": 8.70, "700-749": 9.20, "650-699": 9.60, "below650": 0 }, B: { "825+": 0, "800-824": 0, "750-799": 0, "700-749": 0, "650-699": 0, "below650": 0 } } },
-];
-
 type KhathaKey = "A" | "B";
-type CibilKey = "825+" | "800-824" | "750-799" | "700-749" | "650-699" | "below650" | "dontknow";
+type CibilKey = "825+" | "800+" | "750+" | "700-749" | "650-699" | "dontknow";
 
 const CIBIL_OPTIONS: { value: CibilKey; label: string }[] = [
   { value: "825+", label: "825+" },
-  { value: "800-824", label: "800–824" },
-  { value: "750-799", label: "750–799" },
+  { value: "800+", label: "800+" },
+  { value: "750+", label: "750+" },
   { value: "700-749", label: "700–749" },
   { value: "650-699", label: "650–699" },
-  { value: "below650", label: "Below 650" },
   { value: "dontknow", label: "Don't Know" },
 ];
 
@@ -51,12 +41,16 @@ function fmt(v: number) {
   }).format(v);
 }
 
-function getRate(bank: string, khatha: KhathaKey, cibil: CibilKey): number {
-  const b = BANKS.find((x) => x.name === bank);
+function getRate(banks: any[], bankName: string, khatha: KhathaKey, cibil: CibilKey): number {
+  const b = banks.find((x) => x.name === bankName);
   if (!b) return 8.5;
-  // "Don't Know" defaults to 750-799 range as a safe midpoint
-  const effectiveCibil: Exclude<CibilKey, "dontknow"> = cibil === "dontknow" ? "750-799" : cibil;
-  return b.homeRate[khatha][effectiveCibil] || 0;
+  // "Don't Know" defaults to 750+ range as a safe midpoint
+  const effectiveCibil: Exclude<CibilKey, "dontknow"> = cibil === "dontknow" ? "750+" : cibil;
+  const khathaObj = khatha === "A" ? b.homeLoan.A_Khatha : b.homeLoan.B_Khatha;
+  if (!khathaObj) return 0;
+  const rateStr = khathaObj[effectiveCibil];
+  if (!rateStr || rateStr === "N/A") return 0;
+  return parseFloat(rateStr.replace("%", "")) || 0;
 }
 
 /* ─── Tenure Helper ─── */
@@ -98,6 +92,7 @@ function TenureInput({
 
 /* ─── Khatha + CIBIL Selectors ─── */
 function BankSelectors({
+  banks,
   bank,
   setBank,
   khatha,
@@ -105,6 +100,7 @@ function BankSelectors({
   cibil,
   setCibil,
 }: {
+  banks: any[];
   bank: string;
   setBank: (v: string) => void;
   khatha: KhathaKey | "dontknow";
@@ -117,7 +113,7 @@ function BankSelectors({
       <div>
         <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Bank</label>
         <select value={bank} onChange={(e) => setBank(e.target.value)} className="w-full h-12 px-4 border border-[var(--surface-border)] bg-[var(--surface)] rounded-xl text-sm font-medium focus:border-[var(--brand-blue)] focus:outline-none transition-colors">
-          {BANKS.map((b) => <option key={b.name}>{b.name}</option>)}
+          {banks.map((b) => <option key={b.name}>{b.name}</option>)}
         </select>
       </div>
       <div>
@@ -152,6 +148,16 @@ type Tab = (typeof TABS)[number]["id"];
    ═══════════════════════════════════════════════════════ */
 export default function EMICalculator({ onClose }: { onClose: () => void }) {
   const [activeTab, setActiveTab] = useState<Tab>("emi");
+  const [banks, setBanks] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${APPS_SCRIPT_URL}?action=banks`)
+      .then((r) => r.json())
+      .then((data) => setBanks(data))
+      .catch(() => setBanks([]))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <motion.div
@@ -211,9 +217,22 @@ export default function EMICalculator({ onClose }: { onClose: () => void }) {
 
         {/* ─ Tab Content ─ */}
         <div className="p-6 sm:p-8 bg-white">
-          {activeTab === "eligibility" && <EligibilityTab />}
-          {activeTab === "emi" && <EMITab />}
-          {activeTab === "bt" && <BalanceTransferTab />}
+          {loading ? (
+            <div className="py-20 flex flex-col items-center justify-center text-gray-400">
+              <Loader2 className="w-8 h-8 animate-spin mb-4" />
+              <p className="font-medium">Loading live rates...</p>
+            </div>
+          ) : banks.length === 0 ? (
+             <div className="py-20 flex flex-col items-center justify-center text-red-500">
+              <p className="font-medium">Failed to load live rates.</p>
+            </div>
+          ) : (
+            <>
+              {activeTab === "eligibility" && <EligibilityTab banks={banks} />}
+              {activeTab === "emi" && <EMITab banks={banks} />}
+              {activeTab === "bt" && <BalanceTransferTab />}
+            </>
+          )}
         </div>
       </motion.div>
     </motion.div>
@@ -223,21 +242,21 @@ export default function EMICalculator({ onClose }: { onClose: () => void }) {
 /* ════════════════════════════════════════════════════════════════
    TAB 1: Home Loan Eligibility
    ════════════════════════════════════════════════════════════════ */
-function EligibilityTab() {
+function EligibilityTab({ banks }: { banks: any[] }) {
   const [salary, setSalary] = useState("");
   const [otherIncome, setOtherIncome] = useState<"No" | "Yes">("No");
   const [otherAmount, setOtherAmount] = useState("");
   const [existingEMI, setExistingEMI] = useState("");
   const [tenureMonths, setTenureMonths] = useState(240);
   const [rateMode, setRateMode] = useState<"bank" | "manual">("bank");
-  const [bank, setBank] = useState("SBI");
+  const [bank, setBank] = useState(banks[0]?.name || "SBI");
   const [khatha, setKhatha] = useState<KhathaKey | "dontknow">("A");
   const [cibil, setCibil] = useState<CibilKey>("825+");
   const [manualRate, setManualRate] = useState("");
   const [result, setResult] = useState<{ eligible: number; emi: number; rate: number } | null>(null);
 
   const effectiveKhatha: KhathaKey = khatha === "dontknow" ? "A" : khatha;
-  const rate = rateMode === "bank" ? getRate(bank, effectiveKhatha, cibil) : parseFloat(manualRate) || 0;
+  const rate = rateMode === "bank" ? getRate(banks, bank, effectiveKhatha, cibil) : parseFloat(manualRate) || 0;
 
   function calculate() {
     const monthlyIncome = (parseFloat(salary) || 0) + (otherIncome === "Yes" ? parseFloat(otherAmount) || 0 : 0);
@@ -295,7 +314,7 @@ function EligibilityTab() {
           </label>
         </div>
         {rateMode === "bank" ? (
-          <BankSelectors bank={bank} setBank={setBank} khatha={khatha} setKhatha={setKhatha} cibil={cibil} setCibil={setCibil} />
+          <BankSelectors banks={banks} bank={bank} setBank={setBank} khatha={khatha} setKhatha={setKhatha} cibil={cibil} setCibil={setCibil} />
         ) : (
           <input type="number" step="0.01" placeholder="e.g. 8.50" value={manualRate} onChange={(e) => setManualRate(e.target.value)}
             className="w-full sm:w-48 h-12 px-4 border border-[var(--surface-border)] bg-[var(--surface)] rounded-xl text-sm font-medium focus:border-[var(--brand-blue)] focus:outline-none transition-colors" />
@@ -338,17 +357,17 @@ function EligibilityTab() {
 /* ════════════════════════════════════════════════════════════════
    TAB 2: EMI Calculator
    ════════════════════════════════════════════════════════════════ */
-function EMITab() {
+function EMITab({ banks }: { banks: any[] }) {
   const [loanAmount, setLoanAmount] = useState(5000000);
   const [rateMode, setRateMode] = useState<"bank" | "manual">("bank");
-  const [bank, setBank] = useState("SBI");
+  const [bank, setBank] = useState(banks[0]?.name || "SBI");
   const [khatha, setKhatha] = useState<KhathaKey | "dontknow">("A");
   const [cibil, setCibil] = useState<CibilKey>("825+");
   const [manualRate, setManualRate] = useState(8.5);
   const [tenureMonths, setTenureMonths] = useState(240);
 
   const effectiveKhatha: KhathaKey = khatha === "dontknow" ? "A" : khatha;
-  const interestRate = rateMode === "bank" ? getRate(bank, effectiveKhatha, cibil) : manualRate;
+  const interestRate = rateMode === "bank" ? getRate(banks, bank, effectiveKhatha, cibil) : manualRate;
   const { emi, total, interest } = calcEMI(loanAmount, interestRate, tenureMonths);
   const principalPct = total > 0 ? Math.round((loanAmount / total) * 100) : 0;
   const interestPct = 100 - principalPct;
@@ -386,7 +405,7 @@ function EMITab() {
           </label>
         </div>
         {rateMode === "bank" ? (
-          <BankSelectors bank={bank} setBank={setBank} khatha={khatha} setKhatha={setKhatha} cibil={cibil} setCibil={setCibil} />
+          <BankSelectors banks={banks} bank={bank} setBank={setBank} khatha={khatha} setKhatha={setKhatha} cibil={cibil} setCibil={setCibil} />
         ) : (
           <div>
             <div className="flex justify-between items-center mb-4">
