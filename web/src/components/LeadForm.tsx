@@ -43,29 +43,21 @@ export default function LeadForm({
       window.open(waLink, "_blank");
     };
 
-    try {
-      const res = await fetch(APPS_SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify({ action: "leads", name: name.trim(), phone, service }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        const newLeadId = data.lead_id || "BPL-XXXX";
-        setLeadId(newLeadId);
-        setFormState("success");
-        openWhatsApp(newLeadId);
-      } else {
-        setFormState("error");
-      }
-    } catch {
-      // If backend is offline, still show "success" — we save locally
-      console.warn("Backend unavailable — lead saved locally");
-      const newLeadId = `BPL-${Math.floor(1000 + Math.random() * 9000)}`;
-      setLeadId(newLeadId);
-      setFormState("success");
-      openWhatsApp(newLeadId);
-    }
+    // Generate lead ID immediately on client side
+    const newLeadId = `BPL-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    // Fire-and-forget: send to Google Sheets in background
+    // no-cors is required for Google Apps Script POST from browser
+    fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify({ action: "leads", name: name.trim(), phone, service, lead_id: newLeadId }),
+    }).catch(() => console.warn("Could not reach Google Sheets"));
+
+    setLeadId(newLeadId);
+    setFormState("success");
+    openWhatsApp(newLeadId);
+
   };
 
   return (

@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig = {
+  output: 'export',
   experimental: {
     serverActions: {
       allowedOrigins: ['10.41.66.58', 'localhost:3000'],

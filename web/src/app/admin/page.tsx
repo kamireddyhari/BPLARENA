@@ -136,7 +136,7 @@ export default function AdminPage() {
     try {
       await fetch(APPS_SCRIPT_URL, {
         method: "POST",
-        headers: { "Content-Type": "text/plain" },
+        mode: "no-cors",
         body: JSON.stringify({ action: "saveBanks", banks }),
       });
       setSaved(true);
